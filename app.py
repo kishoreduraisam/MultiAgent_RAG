@@ -148,32 +148,11 @@ agent = CodeAgent(
     description=None,
     prompt_templates=prompt_templates
 )
-# -------------------- Gradio UI -------------------- #
-def handle_resume_upload(file):
-    temp_path = f"/tmp/{file.name}"
-    with open(temp_path, "wb") as f:
-        f.write(file.read())
-    return upload_resume(temp_path)
 
-def handle_resume_question(question):
-    return ask_resume_question(question)
-
-with gr.Blocks() as demo:
-    gr.Markdown("## Resume Q&A Agent")
-    
-    with gr.Tab("Upload Resume"):
-        resume_file = gr.File(label="Upload your resume (PDF or TXT)")
-        upload_button = gr.Button("Upload")
-        upload_output = gr.Textbox(label="Upload status")
-        upload_button.click(fn=handle_resume_upload, inputs=resume_file, outputs=upload_output)
-    
-    with gr.Tab("Ask Questions"):
-        question_input = gr.Textbox(label="Ask a question about your resume")
-        answer_output = gr.Textbox(label="Answer")
-        ask_button = gr.Button("Ask")
-        ask_button.click(fn=handle_resume_question, inputs=question_input, outputs=answer_output)
-
-demo.launch()
-
-
+# -------------------- Launch Chat Interface -------------------- #
 GradioUI(agent).launch()
+
+# -------------------- Example Usage in Code -------------------- #
+# Uncomment to test in code without the UI
+upload_resume("/path/to/your/resume.pdf")
+# print(ask_resume_question("What programming languages do I know?"))
