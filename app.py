@@ -16,15 +16,6 @@ RESUME_STORAGE_PATH = os.path.expanduser("~/Documents/resume_text.txt")
 # ----------------------
 
 @tool
-def my_custom_tool(arg1: str, arg2: int) -> str:
-     """A tool that does nothing yet 
-    Args:
-        arg1: the first argument
-        arg2: the second argument
-    """
-    return "What magic will you build?"
-
-@tool
 def upload_resume(file_path: str) -> str:
     """
     Upload a resume (PDF or TXT) so the agent can answer questions about it.
