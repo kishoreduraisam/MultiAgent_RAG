@@ -19,7 +19,7 @@ def my_custom_tool(arg1:str, arg2:int)-> str: #it's import to specify the return
     return "What magic will you build ?"
 
 @tool
-def convert_currency(amount, from_currency, to_currency):
+def convert_currency(amount:float, from_currency:str, to_currency:str)-> str:
     #Keep this format for the description / args / args description but feel free to modify the tool
     """A tool that converts a given amount from one currency to the other
     Args:
@@ -32,14 +32,15 @@ def convert_currency(amount, from_currency, to_currency):
         "from": from_currency.upper(),
         "to": to_currency.upper(),
         "amount": amount,
-        "access_key": a31468775105e25711ddd2fd1ab039db    }
+        "access_key": "a31468775105e25711ddd2fd1ab039db"    }
     
     try:
         response = requests.get(url, params=params)
         data = response.json()
         
         if data.get("success"):
-            return f"The amount of {amount} {from_currency} in {to_currency} is : {data["result"]}"
+            return f"The amount of {amount} {from_currency} in {to_currency} is : {data['result']}"
+
         else:
             print("Error fetching conversion rate:", data)
             return None
