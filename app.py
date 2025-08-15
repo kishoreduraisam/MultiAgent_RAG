@@ -154,5 +154,5 @@ GradioUI(agent).launch()
 
 # -------------------- Example Usage in Code -------------------- #
 # Uncomment to test in code without the UI
-print(upload_resume("~/Documents/resume.pdf"))
+print(upload_resume("/Users/kani/Documents/resume.pdf"))
 print(ask_resume_question("What programming languages do I know?"))
