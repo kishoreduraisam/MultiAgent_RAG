@@ -27,7 +27,7 @@ def upload_resume(file_path: str) -> str:
     """
     Upload a resume (PDF or TXT) so the agent can answer questions about it.
     Args:
-        file_path: Path to the resume file
+        file_path: Path to the resume file to be reviewed
     """
     global resume_text
     if file_path.lower().endswith(".pdf"):
