@@ -17,14 +17,19 @@ RESUME_STORAGE_PATH = os.path.expanduser("~/Documents/resume_text.txt")
 
 @tool
 def my_custom_tool(arg1: str, arg2: int) -> str:
-    """A tool that does nothing yet"""
+     """A tool that does nothing yet 
+    Args:
+        arg1: the first argument
+        arg2: the second argument
+    """
     return "What magic will you build?"
 
 @tool
 def upload_resume(file_path: str) -> str:
     """
     Upload a resume (PDF or TXT) so the agent can answer questions about it.
-    The resume is stored persistently in RESUME_STORAGE_PATH.
+    Args:
+        file_path: Path to the resume file to be reviewed
     """
     file_path = os.path.expanduser(file_path)
     resume_text = ""
@@ -56,6 +61,8 @@ def upload_resume(file_path: str) -> str:
 def ask_resume_question(question: str) -> str:
     """
     Ask a question about the uploaded resume.
+    Args:
+        question: The question you want to ask
     """
     if not os.path.exists(RESUME_STORAGE_PATH):
         return "No resume uploaded yet. Please upload your resume first."
@@ -71,6 +78,12 @@ def ask_resume_question(question: str) -> str:
 
 @tool
 def convert_currency(amount: float, from_currency: str, to_currency: str) -> str:
+    """A tool that converts a given amount from one currency to the other
+    Args:
+        amount: The Amount to convert
+        from_currency: From currency
+        to_currency: To Currency
+    """
     url = "https://api.exchangerate.host/convert"
     params = {
         "from": from_currency.upper(),
@@ -89,6 +102,10 @@ def convert_currency(amount: float, from_currency: str, to_currency: str) -> str
 
 @tool
 def get_current_time_in_timezone(timezone: str) -> str:
+    """A tool that fetches the current local time in a specified timezone.
+    Args:
+        timezone: A string representing a valid timezone (e.g., 'America/New_York').
+    """
     try:
         tz = pytz.timezone(timezone)
         local_time = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
