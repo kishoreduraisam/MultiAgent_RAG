@@ -19,6 +19,35 @@ def my_custom_tool(arg1:str, arg2:int)-> str: #it's import to specify the return
     return "What magic will you build ?"
 
 @tool
+def convert_currency(amount, from_currency, to_currency):
+    #Keep this format for the description / args / args description but feel free to modify the tool
+    """A tool that converts a given amount from one currency to the other
+    Args:
+        amount: The Amount to convert
+        from_currency: From currency
+        to_currency: To Currency
+    """
+    url = f"https://api.exchangerate.host/convert"
+    params = {
+        "from": from_currency.upper(),
+        "to": to_currency.upper(),
+        "amount": amount,
+        "access_key": a31468775105e25711ddd2fd1ab039db    }
+    
+    try:
+        response = requests.get(url, params=params)
+        data = response.json()
+        
+        if data.get("success"):
+            return f"The amount of {amount} {from_currency} in {to_currency} is : {data["result"]}"
+        else:
+            print("Error fetching conversion rate:", data)
+            return None
+    except Exception as e:
+        print("Error:", e)
+        return None
+
+@tool
 def get_current_time_in_timezone(timezone: str) -> str:
     """A tool that fetches the current local time in a specified timezone.
     Args:
