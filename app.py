@@ -3,9 +3,13 @@ import datetime
 import requests
 import pytz
 import yaml
+import PyPDF2
 from tools.final_answer import FinalAnswerTool
 
 from Gradio_UI import GradioUI
+
+# Global variable to store the resume text
+resume_text = ""
 
 # Below is an example of a tool that does nothing. Amaze us with your creativity !
 @tool
@@ -17,6 +21,52 @@ def my_custom_tool(arg1:str, arg2:int)-> str: #it's import to specify the return
         arg2: the second argument
     """
     return "What magic will you build ?"
+
+@tool
+def upload_resume(file_path: str) -> str:
+    """
+    Upload a resume (PDF or TXT) so the agent can answer questions about it.
+    Args:
+        file_path: Path to the resume file
+    """
+    global resume_text
+    if file_path.lower().endswith(".pdf"):
+        try:
+            reader = PyPDF2.PdfReader(file_path)
+            resume_text = ""
+            for page in reader.pages:
+                resume_text += page.extract_text() + "\n"
+            return "Resume uploaded successfully (PDF)."
+        except Exception as e:
+            return f"Error reading PDF: {str(e)}"
+    elif file_path.lower().endswith(".txt"):
+        try:
+            with open(file_path, "r") as f:
+                resume_text = f.read()
+            return "Resume uploaded successfully (TXT)."
+        except Exception as e:
+            return f"Error reading TXT: {str(e)}"
+    else:
+        return "Unsupported file type. Use PDF or TXT."
+
+@tool
+def ask_resume_question(question: str) -> str:
+    """
+    Ask a question about the uploaded resume.
+    Args:
+        question: The question you want to ask
+    """
+    global resume_text
+    if not resume_text:
+        return "No resume uploaded yet. Please upload your resume first."
+    
+    # Combine resume and question for the agent
+    prompt = f"My resume is:\n{resume_text}\n\nQuestion: {question}\nAnswer concisely:"
+    
+    # Generate the answer using your agent's model
+    response = model.complete(prompt)  # Adjust this if your agent uses a different API
+    return response
+
 
 @tool
 def convert_currency(amount:float, from_currency:str, to_currency:str)-> str:
@@ -85,7 +135,9 @@ with open("prompts.yaml", 'r') as stream:
     
 agent = CodeAgent(
     model=model,
-    tools=[final_answer,DuckDuckGoSearchTool(), convert_currency,get_current_time_in_timezone,image_generation_tool], ## add your tools here (don't remove final answer)
+    tools=[final_answer,DuckDuckGoSearchTool(), convert_currency,get_current_time_in_timezone,image_generation_tool,
+        upload_resume,
+        ask_resume_question], ## add your tools here (don't remove final answer)
     max_steps=6,
     verbosity_level=1,
     grammar=None,
