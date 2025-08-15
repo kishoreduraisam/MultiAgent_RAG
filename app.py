@@ -85,7 +85,7 @@ with open("prompts.yaml", 'r') as stream:
     
 agent = CodeAgent(
     model=model,
-    tools=[final_answer], [DuckDuckGoSearchTool]## add your tools here (don't remove final answer)
+    tools=[final_answer,DuckDuckGoSearchTool(), convert_currency,get_current_time_in_timezone,image_generation_tool], ## add your tools here (don't remove final answer)
     max_steps=6,
     verbosity_level=1,
     grammar=None,
