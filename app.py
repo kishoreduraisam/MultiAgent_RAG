@@ -1,101 +1,89 @@
 import os
-from pathlib import Path
-from smolagents import Tool, CodeAgent, HfApiModel
-import PyPDF2
+import json
+from typing import Optional
+from smolagents import tool, ToolCallingAgent, HfApiModel
+from PyPDF2 import PdfReader
 
-# Global variable to store resume text
-RESUME_TEXT = ""
+# Global storage for the resume text (survives across tool calls)
+RESUME_STORE: dict[str, str] = {}
 
 
-class UploadResumeTool(Tool):
+@tool
+def upload_resume(file_path: str) -> str:
     """
-    Tool to upload and parse a resume from a local PDF file.
+    Upload and parse a resume from a local PDF file.
 
-    Inputs:
-        file_path (str): Path to the PDF resume file.
-    
-    Output:
-        str: Success message after loading and parsing the resume.
+    Args:
+        file_path (str): Path to the resume PDF (e.g., '~/Documents/resume.pdf').
+
+    Returns:
+        str: Confirmation message once the resume is uploaded.
     """
+    expanded_path = os.path.expanduser(file_path)
+    if not os.path.exists(expanded_path):
+        return f"Error: File not found at {expanded_path}"
 
-    name = "upload_resume"
-    description = "Upload and parse a resume from a PDF file."
+    reader = PdfReader(expanded_path)
+    text = "\n".join(page.extract_text() or "" for page in reader.pages)
 
-    def forward(self, file_path: str) -> str:
-        global RESUME_TEXT
-        file_path = os.path.expanduser(file_path)
-
-        if not Path(file_path).exists():
-            return f"Error: File not found at {file_path}"
-
-        text = []
-        with open(file_path, "rb") as f:
-            reader = PyPDF2.PdfReader(f)
-            for page in reader.pages:
-                text.append(page.extract_text())
-
-        RESUME_TEXT = "\n".join(text)
-        return f"Resume successfully loaded from {file_path}"
+    RESUME_STORE["resume_text"] = text
+    return "Resume uploaded successfully."
 
 
-class SummarizeResumeTool(Tool):
+@tool
+def summarize_resume() -> str:
     """
-    Tool to summarize the uploaded resume.
+    Summarize the uploaded resume.
 
-    Inputs:
-        None (uses the global resume text).
-    
-    Output:
-        str: Short summary of the resume text.
+    Returns:
+        str: A summary of the resume content.
     """
+    resume_text = RESUME_STORE.get("resume_text")
+    if not resume_text:
+        return "No resume uploaded. Please use upload_resume first."
 
-    name = "summarize_resume"
-    description = "Summarize the uploaded resume."
-
-    def forward(self) -> str:
-        global RESUME_TEXT
-        if not RESUME_TEXT:
-            return "No resume has been uploaded yet."
-        return f"Resume Summary:\n{RESUME_TEXT[:500]}..."  # preview only
+    # Here we just do a naive summary (first 500 chars).
+    # In practice, you could run this through a model for better summarization.
+    summary = resume_text[:500] + "..." if len(resume_text) > 500 else resume_text
+    return f"Resume Summary:\n{summary}"
 
 
-class QueryResumeTool(Tool):
+@tool
+def query_resume(question: str) -> str:
     """
-    Tool to answer questions about the uploaded resume.
+    Query details from the uploaded resume.
 
-    Inputs:
-        query (str): A question about the resume content.
-    
-    Output:
-        str: Answer based on the uploaded resume text.
+    Args:
+        question (str): A natural language question about the resume.
+
+    Returns:
+        str: An answer based on the resume content.
     """
+    resume_text = RESUME_STORE.get("resume_text")
+    if not resume_text:
+        return "No resume uploaded. Please use upload_resume first."
 
-    name = "query_resume"
-    description = "Answer questions about the uploaded resume."
-
-    def forward(self, query: str) -> str:
-        global RESUME_TEXT
-        if not RESUME_TEXT:
-            return "No resume has been uploaded yet."
-        return f"Answering based on resume: {query}\nRelevant content: {RESUME_TEXT[:500]}..."
+    # Naive keyword match (replace with RAG or model query if needed)
+    if question.lower() in resume_text.lower():
+        return f"Yes, the resume mentions: {question}"
+    return f"Could not find information about: {question}"
 
 
-# ---- Initialize Model ----
-# Using a chat-compatible model (not flan-t5-small, which caused StopIteration)
-model = HfApiModel("HuggingFaceH4/zephyr-7b-beta")
+# ---------------- Agent Setup ----------------
 
-# ---- Initialize Agent ----
-agent = CodeAgent(
-    tools=[UploadResumeTool(), SummarizeResumeTool(), QueryResumeTool()],
+# Use a model that supports chat completions
+model = HfApiModel(model="mistralai/Mistral-7B-Instruct-v0.3")  
+
+agent = ToolCallingAgent(
+    tools=[upload_resume, summarize_resume, query_resume],
     model=model,
-    add_base_tools=True,
-    max_iterations=5,
+    max_steps=5,
+    verbosity=2,
 )
 
-# ---- Automatically upload resume at startup ----
-default_resume_path = "~/Documents/resume.pdf"
-upload_tool = UploadResumeTool()
-print(upload_tool.forward(default_resume_path))  # auto-load resume
 
-# ---- Example Agent Chat ----
-agent.run("Summarize my resume in 3 bullet points.")
+if __name__ == "__main__":
+    # Example usage
+    print(agent.run("Please load my resume from ~/Documents/resume.pdf"))
+    print(agent.run("Summarize my resume"))
+    print(agent.run("Does my resume mention Python?"))
