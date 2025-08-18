@@ -6,6 +6,7 @@ import pytz
 import yaml
 import PyPDF2
 import os
+from Gradio_UI import GradioUI
 
 # Global variable to store resume text
 resume_text = ""
