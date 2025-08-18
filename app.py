@@ -62,7 +62,7 @@ def convert_currency(amount: float, from_currency: str, to_currency: str) -> str
         Converted amount as a string
     """
     url = f"https://api.exchangerate.host/convert"
-    params = {"from": from_currency.upper(), "to": to_currency.upper(), "amount": amount}
+    params = {"from": from_currency.upper(), "to": to_currency.upper(), "amount": amount,"access_key": "a31468775105e25711ddd2fd1ab039db"}
     try:
         response = requests.get(url, params=params)
         data = response.json()
