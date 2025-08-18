@@ -131,7 +131,7 @@ preset_prompts = {
 }
 
 def send_preset_prompt(prompt_text):
-    return agent.ask(prompt_text)
+    return agent.task(prompt_text)
 
 # Auto-load resume on startup
 upload_resume()
