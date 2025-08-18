@@ -141,3 +141,5 @@ agent = CodeAgent(
 
 # Auto-load resume on startup
 upload_resume()
+
+GradioUI(agent).launch()
