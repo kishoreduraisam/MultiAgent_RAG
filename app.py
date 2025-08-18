@@ -69,7 +69,7 @@ agent = ToolCallingAgent(
 )
 
 # ---------------- Auto Resume Load ----------------
-RESUME_PATH = "~/Documents/resume.pdf"
+RESUME_PATH = "/Users/kani/Documents/resume.pdf"
 if os.path.exists(os.path.expanduser(RESUME_PATH)):
     print("📂 Auto-loading resume...")
     print(upload_resume(RESUME_PATH))
