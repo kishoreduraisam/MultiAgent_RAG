@@ -125,9 +125,9 @@ agent = CodeAgent(
 # Preset prompt buttons
 # ---------------------
 preset_prompts = {
-    "Upload Resume Instructions": "Please upload my resume so you can analyze it.",
     "Resume Summary": "Summarize my uploaded resume.",
-    "Resume Improvement Tips": "Give me tips to improve my resume."
+    "Achievements": "Give me my greatest achievement",
+    "Why hire me?" : "Why should you hire me?"
 }
 
 def send_preset_prompt(prompt_text):
@@ -137,10 +137,17 @@ def send_preset_prompt(prompt_text):
 upload_resume()
 
 with gr.Blocks() as demo:
-    chat = gr.Chatbot()
+    chat = gr.Chatbot(type="messages")  # updated per warning
+    prompt_input = gr.Textbox(value="", visible=False)  # hidden textbox for passing prompt
     
     with gr.Row():
         for label, prompt in preset_prompts.items():
-            gr.Button(label).click(fn=send_preset_prompt, inputs=[], outputs=chat, _js=f"() => '{prompt}'")
+            # Pass the hidden textbox to store the prompt
+            button = gr.Button(label)
+            button.click(
+                fn=send_preset_prompt,
+                inputs=[gr.Textbox(value=prompt, visible=False)],
+                outputs=chat
+            )
     
     demo.launch()
