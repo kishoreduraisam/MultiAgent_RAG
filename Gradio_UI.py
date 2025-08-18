@@ -112,7 +112,7 @@ def pull_messages_from_step(
         step_footnote = f"{step_number}"
         if hasattr(step_log, "input_token_count") and hasattr(step_log, "output_token_count"):
             token_str = (
-                f" | Input-tokens:{step_log.input_token_count:,} | Output-tokens:{step_log.output_token_count:,}"
+                f" | Input-tokens:{step_log.input_token_count or 0:,} | Output-tokens:{step_log.output_token_count or 0:,}"
             )
             step_footnote += token_str
         if hasattr(step_log, "duration"):
