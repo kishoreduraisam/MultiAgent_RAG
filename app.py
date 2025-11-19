@@ -1,4 +1,4 @@
-from smolagents import CodeAgent, DuckDuckGoSearchTool, HfApiModel, load_tool, tool
+from smolagents import CodeAgent, HfApiModel, load_tool, tool
 from tools.final_answer import FinalAnswerTool
 import datetime
 import requests
@@ -118,7 +118,6 @@ agent = CodeAgent(
     model=model,
     tools=[
         final_answer,
-        DuckDuckGoSearchTool(),
         convert_currency,
         get_current_time_in_timezone,
         image_generation_tool,
