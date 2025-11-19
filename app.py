@@ -151,6 +151,6 @@ with gr.Blocks() as ui:
 
     send.click(run_agent, [msg, chatbot], [chatbot, msg])
 
-GradioUI(agent).launch(root=ui)
+# GradioUI(agent).launch(root=ui)
 
-# GradioUI(agent).launch()
+GradioUI(agent).launch()
