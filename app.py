@@ -132,17 +132,14 @@ agent = CodeAgent(
 # Auto-load resume on startup
 upload_resume()
 
-class GradioUI:
+# ------------------- Gradio UI with Predefined Prompts ------------------- #
+class ResumeChatUI:
     def __init__(self, agent):
         self.agent = agent
 
     def launch(self):
-        # Build the interface
         with gr.Blocks() as demo:
-            # Chat display
             chatbot = gr.Chatbot()
-
-            # Input textbox
             msg = gr.Textbox(placeholder="Ask me anything about your resume...")
 
             # Predefined prompts
@@ -154,22 +151,25 @@ class GradioUI:
                 "What job roles am I most suitable for given my experience?",
             ]
 
-            # Render buttons in a row
-            with gr.Row():
-                for p in predefined_prompts:
-                    gr.Button(p).click(lambda x=p: x, None, msg)  # autofill textbox
-
-            # Send button
-            send = gr.Button("Send")
-
-            # Connect Send button to agent
+            # Send function
             def run_agent(user_input, history):
                 reply = self.agent.run(user_input)
                 history = history + [(user_input, reply)]
                 return history, ""  # clear input box
 
+            send = gr.Button("Send")
             send.click(run_agent, [msg, chatbot], [chatbot, msg])
+
+            # Predefined prompt buttons (auto-send)
+            with gr.Row():
+                for p in predefined_prompts:
+                    gr.Button(p).click(
+                        run_agent,
+                        inputs=[gr.State(value=p), chatbot],
+                        outputs=[chatbot, msg]
+                    )
 
         demo.launch()
 
-GradioUI(agent).launch()
+# ------------------- Launch ------------------- #
+ResumeChatUI(agent).launch()
