@@ -133,24 +133,44 @@ agent = CodeAgent(
 # Auto-load resume on startup
 upload_resume()
 
-with gr.Blocks() as ui:
-    chatbot = gr.Chatbot()
-    msg = gr.Textbox(placeholder="Ask the agent anything...")
-    send = gr.Button("Send")
+class GradioUI:
+    def __init__(self, agent):
+        self.agent = agent
 
-    # Row of clickable predefined prompt buttons
-    with gr.Row():
-        for p in predefined_prompts:
-            gr.Button(p).click(lambda x=p: x, None, msg)   # autofill textbox on click
+    def launch(self):
+        # Build the interface
+        with gr.Blocks() as demo:
+            # Chat display
+            chatbot = gr.Chatbot()
 
-    # When the Send button is clicked, call the agent
-    def run_agent(user_input, history):
-        reply = agent.run(user_input)
-        history = history + [(user_input, reply)]
-        return history, ""
+            # Input textbox
+            msg = gr.Textbox(placeholder="Ask me anything about your resume...")
 
-    send.click(run_agent, [msg, chatbot], [chatbot, msg])
+            # Predefined prompts
+            predefined_prompts = [
+                "Summarize my resume",
+                "List my leadership achievements",
+                "Rewrite my resume into bullet points with measurable impact",
+                "Generate an elevator pitch based on my resume",
+                "What job roles am I most suitable for given my experience?",
+            ]
 
-# GradioUI(agent).launch(root=ui)
+            # Render buttons in a row
+            with gr.Row():
+                for p in predefined_prompts:
+                    gr.Button(p).click(lambda x=p: x, None, msg)  # autofill textbox
 
-GradioUI(agent).launch()
+            # Send button
+            send = gr.Button("Send")
+
+            # Connect Send button to agent
+            def run_agent(user_input, history):
+                reply = self.agent.run(user_input)
+                history = history + [(user_input, reply)]
+                return history, ""  # clear input box
+
+            send.click(run_agent, [msg, chatbot], [chatbot, msg])
+
+        demo.launch()
+
+# GradioUI(agent).launch()
