@@ -172,4 +172,4 @@ class GradioUI:
 
         demo.launch()
 
- GradioUI(agent).launch()
+GradioUI(agent).launch()
