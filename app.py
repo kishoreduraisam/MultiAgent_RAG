@@ -216,34 +216,33 @@ class ResumeChatUI:
                 def add(content):
                     history.append({"role": "assistant", "content": content})
             
-                # Check if agent has step_logs to capture intermediate outputs
+                # Try to capture images from agent's step outputs
                 generated_images = []
-                if hasattr(self.agent, 'logs') and self.agent.logs:
-                    for log_entry in self.agent.logs:
-                        if hasattr(log_entry, 'observations'):
-                            obs = log_entry.observations
-                            if isinstance(obs, (Image, PngImagePlugin.PngImageFile)):
-                                if obs.mode != 'RGB':
-                                    obs = obs.convert("RGB")
-                                generated_images.append(obs)
                 
-                # Add any captured images first
+                # Check agent's step_log attribute
+                if hasattr(self.agent, 'step_log') and self.agent.step_log:
+                    for step in self.agent.step_log:
+                        if 'output' in step and isinstance(step['output'], (Image, PngImagePlugin.PngImageFile)):
+                            img = step['output']
+                            if img.mode != 'RGB':
+                                img = img.convert("RGB")
+                            generated_images.append(img)
+                
+                # Add captured images
                 for img in generated_images:
                     add(img)
             
-                # Then add the final reply
+                # Process final reply
                 if isinstance(reply, list):
                     for item in reply:
                         if isinstance(item, tuple):
                             item = item[1]
-            
                         if isinstance(item, (Image, PngImagePlugin.PngImageFile)):
                             if item.mode != 'RGB':
                                 item = item.convert("RGB")
                             add(item)
                         else:
                             add(str(item))
-            
                 else:
                     if isinstance(reply, (Image, PngImagePlugin.PngImageFile)):
                         if reply.mode != 'RGB':
