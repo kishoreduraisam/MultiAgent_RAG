@@ -152,7 +152,7 @@ model = HfApiModel(
     model_id='Qwen/Qwen2.5-Coder-32B-Instruct',  # keep your current model
 )
 
-image_generation_tool = load_tool("agents-course/text-to-image", trust_remote_code=True)
+image_generation_tool = load_tool("m-ric/text-to-image", trust_remote_code=True)
 superhero_party_theme_generator = SuperheroPartyThemeGenerator()
 
 with open("prompts.yaml", 'r') as stream:
