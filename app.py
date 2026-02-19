@@ -202,31 +202,36 @@ class ResumeChatUI:
                 history = history or []
 
                 reply = self.agent.run(user_input)
-
+            
                 history.append({"role": "user", "content": user_input})
-
+            
                 from PIL.Image import Image
                 import numpy as np
-
+            
+                def safe_image(img):
+                    img.load()                 # ⭐ force load
+                    img = img.convert("RGB")   # ⭐ normalize mode
+                    return np.array(img)
+            
                 def add(content):
                     history.append({"role": "assistant", "content": content})
-
+            
                 if isinstance(reply, list):
                     for item in reply:
                         if isinstance(item, tuple):
                             item = item[1]
-
+            
                         if isinstance(item, Image):
-                            add(np.array(item))   
+                            add(safe_image(item))   # ⭐ FIX HERE
                         else:
                             add(str(item))
-
+            
                 else:
                     if isinstance(reply, Image):
-                        add(np.array(reply))    
+                        add(safe_image(reply))      # ⭐ FIX HERE
                     else:
                         add(str(reply))
-
+            
                 return history, ""
 
 
