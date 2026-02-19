@@ -214,7 +214,7 @@ class ResumeChatUI:
                         if isinstance(item, tuple) and isinstance(item[1], Image):
                             history.append({
                             "role": "assistant",
-                            "content": gr.Image(item[1])
+                            "content": item[1]
                         })
                     else:
                         history.append({
