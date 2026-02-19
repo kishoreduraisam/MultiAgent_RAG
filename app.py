@@ -185,7 +185,7 @@ class ResumeChatUI:
 
     def launch(self):
         with gr.Blocks() as demo:
-            chatbot = gr.Chatbot()
+            chatbot = gr.Chatbot(type="messages")
             msg = gr.Textbox(placeholder="Ask me anything about your resume...")
 
             # Predefined prompts
@@ -199,15 +199,30 @@ class ResumeChatUI:
 
             # Send function
             def run_agent(user_input, history):
-                reply = self.agent.run(user_input)
+    history = history or []
 
-                if isinstance(reply, list):
-                    history.append((user_input, None))
-                    history.extend(reply)
-                else:
-                    history.append((user_input, str(reply)))
+    reply = self.agent.run(user_input)
 
-            return history, ""
+    # Add user message
+    history.append({"role": "user", "content": user_input})
+
+    # Handle image replies
+    from PIL.Image import Image
+
+    if isinstance(reply, list):
+        for item in reply:
+            if isinstance(item, tuple) and isinstance(item[1], Image):
+                history.append({
+                    "role": "assistant",
+                    "content": gr.Image(item[1])
+                })
+    else:
+        history.append({
+            "role": "assistant",
+            "content": str(reply)
+        })
+
+    return history, ""
 
             send = gr.Button("Send")
             send.click(run_agent, [msg, chatbot], [chatbot, msg])
