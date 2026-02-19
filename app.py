@@ -217,39 +217,34 @@ class ResumeChatUI:
             
                 # Handle AgentImage type (smolagents wrapper)
                 if hasattr(reply, '__class__') and 'AgentImage' in reply.__class__.__name__:
-                    # AgentImage has a path or can be converted to PIL Image
-                    # Try to get the actual image
-                    if hasattr(reply, 'to_pil'):
-                        img = reply.to_pil()
-                    elif hasattr(reply, 'path'):
-                        img = PILImage.open(reply.path)
-                    elif hasattr(reply, '__fspath__'):
-                        img = PILImage.open(str(reply))
-                    else:
-                        # It might be string path
-                        img = PILImage.open(str(reply))
-                    
-                    if img.mode != 'RGB':
-                        img = img.convert("RGB")
-                    add(img)
+                    # AgentImage contains a file path - use it directly
+                    image_path = str(reply)
+                    # For Gradio Chatbot with type="messages", we need to use a dict format
+                    add({"path": image_path})
                 
                 elif isinstance(reply, list):
                     for item in reply:
                         if isinstance(item, tuple):
                             item = item[1]
             
-                        if isinstance(item, (PILImage.Image, PngImagePlugin.PngImageFile)):
-                            if item.mode != 'RGB':
-                                item = item.convert("RGB")
-                            add(item)
+                        if hasattr(item, '__class__') and 'AgentImage' in item.__class__.__name__:
+                            add({"path": str(item)})
+                        elif isinstance(item, (PILImage.Image, PngImagePlugin.PngImageFile)):
+                            # Save temp file and use path
+                            import tempfile
+                            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as f:
+                                item.save(f.name)
+                                add({"path": f.name})
                         else:
                             add(str(item))
             
                 else:
                     if isinstance(reply, (PILImage.Image, PngImagePlugin.PngImageFile)):
-                        if reply.mode != 'RGB':
-                            reply = reply.convert("RGB")
-                        add(reply)
+                        # Save temp file and use path
+                        import tempfile
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as f:
+                            reply.save(f.name)
+                            add({"path": f.name})
                     else:
                         add(str(reply))
             
