@@ -202,37 +202,52 @@ class ResumeChatUI:
                 history = history or []
             
                 reply = self.agent.run(user_input)
+
+                # Debug: print agent attributes
+                print("Agent attributes:", dir(self.agent))
+                print("Reply type:", type(reply))
+                print("Reply:", reply)
             
                 history.append({"role": "user", "content": user_input})
             
                 from PIL.Image import Image
                 from PIL import PngImagePlugin
-                import io
-                import base64
             
                 def add(content):
                     history.append({"role": "assistant", "content": content})
             
+                # Check if agent has step_logs to capture intermediate outputs
+                generated_images = []
+                if hasattr(self.agent, 'logs') and self.agent.logs:
+                    for log_entry in self.agent.logs:
+                        if hasattr(log_entry, 'observations'):
+                            obs = log_entry.observations
+                            if isinstance(obs, (Image, PngImagePlugin.PngImageFile)):
+                                if obs.mode != 'RGB':
+                                    obs = obs.convert("RGB")
+                                generated_images.append(obs)
+                
+                # Add any captured images first
+                for img in generated_images:
+                    add(img)
+            
+                # Then add the final reply
                 if isinstance(reply, list):
                     for item in reply:
                         if isinstance(item, tuple):
                             item = item[1]
             
                         if isinstance(item, (Image, PngImagePlugin.PngImageFile)):
-                            # Ensure image is in RGB mode
                             if item.mode != 'RGB':
                                 item = item.convert("RGB")
-                            # Add PIL Image directly - Gradio handles it
                             add(item)
                         else:
                             add(str(item))
             
                 else:
                     if isinstance(reply, (Image, PngImagePlugin.PngImageFile)):
-                        # Ensure image is in RGB mode
                         if reply.mode != 'RGB':
                             reply = reply.convert("RGB")
-                        # Add PIL Image directly - Gradio handles it
                         add(reply)
                     else:
                         add(str(reply))
