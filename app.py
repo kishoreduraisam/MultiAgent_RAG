@@ -1,5 +1,6 @@
 from smolagents import CodeAgent, HfApiModel, load_tool, tool
 from tools.final_answer import FinalAnswerTool
+from tools.superhero_party_theme_generator import SuperheroPartyThemeTool as SuperheroPartyThemeGenerator
 import datetime
 import requests
 import pytz
