@@ -152,6 +152,7 @@ model = HfApiModel(
 )
 
 image_generation_tool = load_tool("agents-course/text-to-image", trust_remote_code=True)
+superhero_party_theme_generator = SuperheroPartyThemeGenerator()
 
 with open("prompts.yaml", 'r') as stream:
     prompt_templates = yaml.safe_load(stream)
@@ -165,7 +166,8 @@ agent = CodeAgent(
         image_generation_tool,
         upload_resume,
         ask_resume_question,
-        webpage_to_markdown  # ← NEW TOOL ADDED
+        webpage_to_markdown,  # ← NEW TOOL ADDED
+        superhero_party_theme_generator
     ],
     max_steps=6,
     verbosity_level=1,
