@@ -200,8 +200,14 @@ class ResumeChatUI:
             # Send function
             def run_agent(user_input, history):
                 reply = self.agent.run(user_input)
-                history = history + [(user_input, reply)]
-                return history, ""  # clear input box
+
+                if isinstance(reply, list):
+                    history.append((user_input, None))
+                    history.extend(reply)
+                else:
+                    history.append((user_input, str(reply)))
+
+            return history, ""
 
             send = gr.Button("Send")
             send.click(run_agent, [msg, chatbot], [chatbot, msg])
