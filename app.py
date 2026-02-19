@@ -199,30 +199,46 @@ class ResumeChatUI:
 
             # Send function
             def run_agent(user_input, history):
-                history = history or []
+    history = history or []
 
-                reply = self.agent.run(user_input)
+    reply = self.agent.run(user_input)
 
-                # Add user message
-                history.append({"role": "user", "content": user_input})
+    # Add user message
+    history.append({"role": "user", "content": user_input})
 
-                # Handle image replies
-                from PIL.Image import Image
+    from PIL.Image import Image
 
-                if isinstance(reply, list):
-                    for item in reply:
-                        if isinstance(item, tuple) and isinstance(item[1], Image):
-                            history.append({
-                            "role": "assistant",
-                            "content": item[1]
-                        })
-                    else:
-                        history.append({
-                        "role": "assistant",
-                        "content": str(reply)
-                })
+    def add_assistant_message(content):
+        history.append({
+            "role": "assistant",
+            "content": content
+        })
 
-                return history, ""
+    # CASE 1 — Direct image
+    if isinstance(reply, Image):
+        add_assistant_message(reply)
+
+    # CASE 2 — List response (most common with smolagents)
+    elif isinstance(reply, list):
+        for item in reply:
+            # tuple format (None, image)
+            if isinstance(item, tuple) and isinstance(item[1], Image):
+                add_assistant_message(item[1])
+
+            # direct image inside list
+            elif isinstance(item, Image):
+                add_assistant_message(item)
+
+            # text inside list
+            else:
+                add_assistant_message(str(item))
+
+    # CASE 3 — Normal text
+    else:
+        add_assistant_message(str(reply))
+
+    return history, ""
+
 
             send = gr.Button("Send")
             send.click(run_agent, [msg, chatbot], [chatbot, msg])
