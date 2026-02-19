@@ -202,7 +202,6 @@ class ResumeChatUI:
                 history = history or []
             
                 reply = self.agent.run(user_input)
-
                 # Debug: print agent attributes
                 print("Agent attributes:", dir(self.agent))
                 print("Reply type:", type(reply))
@@ -210,41 +209,44 @@ class ResumeChatUI:
             
                 history.append({"role": "user", "content": user_input})
             
-                from PIL.Image import Image
+                from PIL import Image as PILImage
                 from PIL import PngImagePlugin
-            
+                
                 def add(content):
                     history.append({"role": "assistant", "content": content})
             
-                # Try to capture images from agent's step outputs
-                generated_images = []
-                
-                # Check agent's step_log attribute
-                if hasattr(self.agent, 'step_log') and self.agent.step_log:
-                    for step in self.agent.step_log:
-                        if 'output' in step and isinstance(step['output'], (Image, PngImagePlugin.PngImageFile)):
-                            img = step['output']
-                            if img.mode != 'RGB':
-                                img = img.convert("RGB")
-                            generated_images.append(img)
-                
-                # Add captured images
-                for img in generated_images:
+                # Handle AgentImage type (smolagents wrapper)
+                if hasattr(reply, '__class__') and 'AgentImage' in reply.__class__.__name__:
+                    # AgentImage has a path or can be converted to PIL Image
+                    # Try to get the actual image
+                    if hasattr(reply, 'to_pil'):
+                        img = reply.to_pil()
+                    elif hasattr(reply, 'path'):
+                        img = PILImage.open(reply.path)
+                    elif hasattr(reply, '__fspath__'):
+                        img = PILImage.open(str(reply))
+                    else:
+                        # It might be string path
+                        img = PILImage.open(str(reply))
+                    
+                    if img.mode != 'RGB':
+                        img = img.convert("RGB")
                     add(img)
-            
-                # Process final reply
-                if isinstance(reply, list):
+                
+                elif isinstance(reply, list):
                     for item in reply:
                         if isinstance(item, tuple):
                             item = item[1]
-                        if isinstance(item, (Image, PngImagePlugin.PngImageFile)):
+            
+                        if isinstance(item, (PILImage.Image, PngImagePlugin.PngImageFile)):
                             if item.mode != 'RGB':
                                 item = item.convert("RGB")
                             add(item)
                         else:
                             add(str(item))
+            
                 else:
-                    if isinstance(reply, (Image, PngImagePlugin.PngImageFile)):
+                    if isinstance(reply, (PILImage.Image, PngImagePlugin.PngImageFile)):
                         if reply.mode != 'RGB':
                             reply = reply.convert("RGB")
                         add(reply)
