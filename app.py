@@ -199,30 +199,30 @@ class ResumeChatUI:
 
             # Send function
             def run_agent(user_input, history):
-    history = history or []
+                history = history or []
 
-    reply = self.agent.run(user_input)
+                reply = self.agent.run(user_input)
 
-    # Add user message
-    history.append({"role": "user", "content": user_input})
+                # Add user message
+                history.append({"role": "user", "content": user_input})
 
-    # Handle image replies
-    from PIL.Image import Image
+                # Handle image replies
+                from PIL.Image import Image
 
-    if isinstance(reply, list):
-        for item in reply:
-            if isinstance(item, tuple) and isinstance(item[1], Image):
-                history.append({
-                    "role": "assistant",
-                    "content": gr.Image(item[1])
+                if isinstance(reply, list):
+                    for item in reply:
+                        if isinstance(item, tuple) and isinstance(item[1], Image):
+                            history.append({
+                            "role": "assistant",
+                            "content": gr.Image(item[1])
+                        })
+                    else:
+                        history.append({
+                        "role": "assistant",
+                        "content": str(reply)
                 })
-    else:
-        history.append({
-            "role": "assistant",
-            "content": str(reply)
-        })
 
-    return history, ""
+                return history, ""
 
             send = gr.Button("Send")
             send.click(run_agent, [msg, chatbot], [chatbot, msg])
