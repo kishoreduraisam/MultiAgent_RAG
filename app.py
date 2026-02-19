@@ -206,13 +206,9 @@ class ResumeChatUI:
                 history.append({"role": "user", "content": user_input})
             
                 from PIL.Image import Image
-                import numpy as np
-            
-                def safe_image(img):
-                    # Remove the img.load() call - convert() handles loading automatically
-                    if img.mode != 'RGB':
-                        img = img.convert("RGB")
-                    return np.array(img)
+                from PIL import PngImagePlugin
+                import io
+                import base64
             
                 def add(content):
                     history.append({"role": "assistant", "content": content})
@@ -222,14 +218,22 @@ class ResumeChatUI:
                         if isinstance(item, tuple):
                             item = item[1]
             
-                        if isinstance(item, Image):
-                            add(safe_image(item))
+                        if isinstance(item, (Image, PngImagePlugin.PngImageFile)):
+                            # Ensure image is in RGB mode
+                            if item.mode != 'RGB':
+                                item = item.convert("RGB")
+                            # Add PIL Image directly - Gradio handles it
+                            add(item)
                         else:
                             add(str(item))
             
                 else:
-                    if isinstance(reply, Image):
-                        add(safe_image(reply))
+                    if isinstance(reply, (Image, PngImagePlugin.PngImageFile)):
+                        # Ensure image is in RGB mode
+                        if reply.mode != 'RGB':
+                            reply = reply.convert("RGB")
+                        # Add PIL Image directly - Gradio handles it
+                        add(reply)
                     else:
                         add(str(reply))
             
