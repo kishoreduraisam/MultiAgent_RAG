@@ -203,41 +203,32 @@ class ResumeChatUI:
 
                 reply = self.agent.run(user_input)
 
-                # Add user message
                 history.append({"role": "user", "content": user_input})
 
                 from PIL.Image import Image
+                import numpy as np
 
-                def add_assistant_message(content):
-                    history.append({
-                    "role": "assistant",
-                    "content": content
-                })
+                def add(content):
+                    history.append({"role": "assistant", "content": content})
 
-                # CASE 1 — Direct image
-                if isinstance(reply, Image):
-                    add_assistant_message(reply)
-
-                # CASE 2 — List response (most common with smolagents)
-                elif isinstance(reply, list):
+                if isinstance(reply, list):
                     for item in reply:
-                        # tuple format (None, image)
-                        if isinstance(item, tuple) and isinstance(item[1], Image):
-                            add_assistant_message(item[1])
+                        if isinstance(item, tuple):
+                            item = item[1]
 
-                        # direct image inside list
-                        elif isinstance(item, Image):
-                            add_assistant_message(item)
-
-                        # text inside list
+                        if isinstance(item, Image):
+                            add(np.array(item))   
                         else:
-                            add_assistant_message(str(item))
+                            add(str(item))
 
-                # CASE 3 — Normal text
                 else:
-                    add_assistant_message(str(reply))
+                    if isinstance(reply, Image):
+                        add(np.array(reply))    
+                    else:
+                        add(str(reply))
 
                 return history, ""
+
 
 
             send = gr.Button("Send")
