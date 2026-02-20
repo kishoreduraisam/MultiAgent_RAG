@@ -1,4 +1,4 @@
-from smolagents import CodeAgent, HfApiModel, load_tool, tool,GoogleSearchTool, InferenceClientModel, VisitWebpageTool
+from smolagents import CodeAgent, HfApiModel, load_tool, tool,GoogleSearchTool, VisitWebpageTool
 from tools.final_answer import FinalAnswerTool
 from tools.superhero_party_theme_generator import SuperheroPartyThemeTool as SuperheroPartyThemeGenerator
 from typing import Optional, Tuple
