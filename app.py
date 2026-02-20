@@ -1,4 +1,6 @@
 from smolagents import CodeAgent, HfApiModel, load_tool, tool,GoogleSearchTool, VisitWebpageTool
+from smolagents.utils import encode_image_base64, make_image_url
+from smolagents import OpenAIServerModel
 from tools.final_answer import FinalAnswerTool
 from tools.superhero_party_theme_generator import SuperheroPartyThemeTool as SuperheroPartyThemeGenerator
 from typing import Optional, Tuple
@@ -71,6 +73,39 @@ def calculate_cargo_travel_time(
 
 print(calculate_cargo_travel_time((41.8781, -87.6298), (-33.8688, 151.2093)))
 
+def check_reasoning_and_plot(final_answer, agent_memory):
+    multimodal_model = OpenAIServerModel("gpt-4o", max_tokens=8096)
+    filepath = "saved_map.png"
+    assert os.path.exists(filepath), "Make sure to save the plot under saved_map.png!"
+    image = Image.open(filepath)
+    prompt = (
+        f"Here is a user-given task and the agent steps: {agent_memory.get_succinct_steps()}. Now here is the plot that was made."
+        "Please check that the reasoning process and plot are correct: do they correctly answer the given task?"
+        "First list reasons why yes/no, then write your final decision: PASS in caps lock if it is satisfactory, FAIL if it is not."
+        "Don't be harsh: if the plot mostly solves the task, it should pass."
+        "To pass, a plot should be made using px.scatter_map and not any other method (scatter_map looks nicer)."
+    )
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": prompt,
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {"url": make_image_url(encode_image_base64(image))},
+                },
+            ],
+        }
+    ]
+    output = multimodal_model(messages).content
+    print("Feedback: ", output)
+    if "FAIL" in output:
+        raise Exception(output)
+    return True
+
 
 # ------------------- Agent Setup ------------------- #
 final_answer = FinalAnswerTool()
@@ -84,7 +119,7 @@ image_generation_tool = load_tool("m-ric/text-to-image", trust_remote_code=True)
 superhero_party_theme_generator = SuperheroPartyThemeGenerator()
 
 
-agent = CodeAgent(
+web_agent = CodeAgent(
     model=model,
     tools=[
         final_answer,
@@ -97,8 +132,30 @@ agent = CodeAgent(
     max_steps=20,
     verbosity_level=1,
     planning_interval=4,
-    additional_authorized_imports=["pandas"]
+    additional_authorized_imports=["pandas"],
+    name="web_agent",
+    description="Browses the web to find information"
 )
+
+manager_agent = CodeAgent(
+    model=InferenceClientModel("deepseek-ai/DeepSeek-R1", provider="together", max_tokens=8096),
+    tools=[calculate_cargo_travel_time],
+    managed_agents=[web_agent],
+    additional_authorized_imports=[
+        "geopandas",
+        "plotly",
+        "shapely",
+        "json",
+        "pandas",
+        "numpy",
+    ],
+    planning_interval=5,
+    verbosity_level=2,
+    final_answer_checks=[check_reasoning_and_plot],
+    max_steps=15
+)
+
+manager_agent.visualize()
 
 
 # ------------------- Gradio UI with Predefined Prompts ------------------- #
@@ -172,4 +229,4 @@ class ResumeChatUI:
         demo.launch()
 
 # ------------------- Launch ------------------- #
-ResumeChatUI(agent).launch()
+ResumeChatUI(manager_agent).launch()
