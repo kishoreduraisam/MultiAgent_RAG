@@ -74,7 +74,10 @@ print(calculate_cargo_travel_time((41.8781, -87.6298), (-33.8688, 151.2093)))
 
 # ------------------- Agent Setup ------------------- #
 final_answer = FinalAnswerTool()
-model = InferenceClientModel(model_id="Qwen/Qwen2.5-Coder-32B-Instruct", provider="together")
+model = HfApiModel(
+    model_id="Qwen/Qwen2.5-Coder-32B-Instruct",
+    token=os.getenv("HF_TOKEN")  # Optional, for private models or higher rate limits
+)
 
 
 image_generation_tool = load_tool("m-ric/text-to-image", trust_remote_code=True)
