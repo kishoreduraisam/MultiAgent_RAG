@@ -1,4 +1,4 @@
-from smolagents import CodeAgent, HfApiModel, load_tool, tool,GoogleSearchTool, VisitWebpageTool
+from smolagents import CodeAgent, HfApiModel, load_tool, tool,GoogleSearchTool, VisitWebpageTool, InferenceClientModel
 from smolagents.utils import encode_image_base64, make_image_url
 from smolagents import OpenAIServerModel
 from tools.final_answer import FinalAnswerTool
