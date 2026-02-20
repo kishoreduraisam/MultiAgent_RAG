@@ -95,7 +95,7 @@ agent = CodeAgent(
         final_answer,
         image_generation_tool,
         superhero_party_theme_generator,
-        calculate_cargo_travel_time
+        calculate_cargo_travel_time,
         GoogleSearchTool("serper"), 
         VisitWebpageTool()
     ],
