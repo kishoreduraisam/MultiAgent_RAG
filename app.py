@@ -50,6 +50,7 @@ class ResumeChatUI:
     def launch(self):
         with gr.Blocks() as demo:
             chatbot = gr.Chatbot(type="messages")
+            msg = gr.Textbox()
 
             # Send function
             def run_agent(user_input, history):
