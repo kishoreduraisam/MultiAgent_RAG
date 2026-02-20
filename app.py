@@ -86,8 +86,6 @@ superhero_party_theme_generator = SuperheroPartyThemeGenerator()
 with open("prompts.yaml", 'r') as stream:
     prompt_templates = yaml.safe_load(stream)
 
-task = """Find all Batman filming locations in the world, calculate the time to transfer via cargo plane to here (we're in Gotham, 40.7128° N, 74.0060° W), and return them to me as a pandas dataframe.
-Also give me some supercar factories with the same cargo plane transfer time."""
 
 agent = CodeAgent(
     model=model,
@@ -104,10 +102,6 @@ agent = CodeAgent(
     prompt_templates=prompt_templates,
     additional_authorized_imports=["pandas"]
 )
-
-result = agent.run(task)
-
-result
 
 
 # ------------------- Gradio UI with Predefined Prompts ------------------- #
