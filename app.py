@@ -99,6 +99,7 @@ agent = CodeAgent(
     ],
     max_steps=20,
     verbosity_level=1,
+    planning_interval=4,
     prompt_templates=prompt_templates,
     additional_authorized_imports=["pandas"]
 )
