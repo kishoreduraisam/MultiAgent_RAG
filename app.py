@@ -83,9 +83,6 @@ model = HfApiModel(
 image_generation_tool = load_tool("m-ric/text-to-image", trust_remote_code=True)
 superhero_party_theme_generator = SuperheroPartyThemeGenerator()
 
-with open("prompts.yaml", 'r') as stream:
-    prompt_templates = yaml.safe_load(stream)
-
 
 agent = CodeAgent(
     model=model,
@@ -99,8 +96,7 @@ agent = CodeAgent(
     ],
     max_steps=20,
     verbosity_level=1,
-    planning_interval=4,
-    prompt_templates=prompt_templates,
+    planning_interval=4
     additional_authorized_imports=["pandas"]
 )
 
