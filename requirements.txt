@@ -5,3 +5,8 @@ duckduckgo_search
 pandas
 PyPDF2
 smolagents[litellm]
+plotly
+kaleido
+geopandas
+shapely
+gradio
