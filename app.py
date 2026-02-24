@@ -1,4 +1,4 @@
-from smolagents import CodeAgent, HfApiModel, load_tool, tool, GoogleSearchTool, VisitWebpageTool, LiteLLMModel
+from smolagents import CodeAgent, HfApiModel, load_tool, tool, GoogleSearchTool, VisitWebpageTool
 from smolagents.utils import encode_image_base64, make_image_url
 from smolagents import OpenAIServerModel
 from tools.final_answer import FinalAnswerTool
@@ -138,10 +138,9 @@ web_agent = CodeAgent(
 )
 
 manager_agent = CodeAgent(
-    model=LiteLLMModel(
-        model_id="together_ai/deepseek-ai/DeepSeek-R1",
-        api_key=os.getenv("TOGETHER_API_KEY"),
-        max_tokens=8096
+    model=HfApiModel(
+        model_id="Qwen/Qwen2.5-Coder-32B-Instruct",
+        token=os.getenv("HF_TOKEN")
     ),
     tools=[calculate_cargo_travel_time],
     managed_agents=[web_agent],
