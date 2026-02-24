@@ -5,8 +5,12 @@ duckduckgo_search
 pandas
 PyPDF2
 smolagents[litellm]
-plotly
+plotly>=5.18.0
 kaleido
 geopandas
 shapely
 gradio
+numpy
+pyyaml
+pytz
+Pillow
