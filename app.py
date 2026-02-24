@@ -150,6 +150,8 @@ manager_agent = CodeAgent(
         "shapely",
         "json",
         "pandas",
+        "plotly.express",
+        "plotly.graph_objects",
         "numpy",
     ],
     planning_interval=5,
