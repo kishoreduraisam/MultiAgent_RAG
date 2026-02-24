@@ -171,65 +171,32 @@ class ResumeChatUI:
     def launch(self):
         with gr.Blocks() as demo:
             chatbot = gr.Chatbot(type="messages")
-            msg = gr.Textbox()
+            msg = gr.Textbox(label="Ask me anything")
+            plot_output = gr.Plot(label="Map Visualization")
 
-            # Send function
             def run_agent(user_input, history):
                 history = history or []
-            
+                
                 reply = self.agent.run(user_input)
-                # Debug: print agent attributes
-                print("Agent attributes:", dir(self.agent))
                 print("Reply type:", type(reply))
-                print("Reply:", reply)
-            
+                
                 history.append({"role": "user", "content": user_input})
-            
-                from PIL import Image as PILImage
-                from PIL import PngImagePlugin
                 
-                def add(content):
-                    history.append({"role": "assistant", "content": content})
-            
-                # Handle AgentImage type (smolagents wrapper)
-                if hasattr(reply, '__class__') and 'AgentImage' in reply.__class__.__name__:
-                    # AgentImage contains a file path - use it directly
-                    image_path = str(reply)
-                    # For Gradio Chatbot with type="messages", we need to use a dict format
-                    add({"path": image_path})
+                import plotly.graph_objects as go
                 
-                elif isinstance(reply, list):
-                    for item in reply:
-                        if isinstance(item, tuple):
-                            item = item[1]
-            
-                        if hasattr(item, '__class__') and 'AgentImage' in item.__class__.__name__:
-                            add({"path": str(item)})
-                        elif isinstance(item, (PILImage.Image, PngImagePlugin.PngImageFile)):
-                            # Save temp file and use path
-                            import tempfile
-                            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as f:
-                                item.save(f.name)
-                                add({"path": f.name})
-                        else:
-                            add(str(item))
-            
+                # Handle Plotly figures
+                if isinstance(reply, go.Figure):
+                    history.append({
+                        "role": "assistant", 
+                        "content": "✅ Map visualization created successfully!"
+                    })
+                    return history, "", reply
                 else:
-                    if isinstance(reply, (PILImage.Image, PngImagePlugin.PngImageFile)):
-                        # Save temp file and use path
-                        import tempfile
-                        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as f:
-                            reply.save(f.name)
-                            add({"path": f.name})
-                    else:
-                        add(str(reply))
-            
-                return history, ""
-
-
+                    history.append({"role": "assistant", "content": str(reply)})
+                    return history, "", None
 
             send = gr.Button("Send")
-            send.click(run_agent, [msg, chatbot], [chatbot, msg])
+            send.click(run_agent, [msg, chatbot], [chatbot, msg, plot_output])
 
         demo.launch()
 
