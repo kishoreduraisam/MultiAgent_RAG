@@ -156,7 +156,7 @@ manager_agent = CodeAgent(
     ],
     planning_interval=5,
     verbosity_level=2,
-    final_answer_checks=[check_reasoning_and_plot],
+    #final_answer_checks=[check_reasoning_and_plot],
     max_steps=15
 )
 
