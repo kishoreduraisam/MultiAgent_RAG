@@ -14,3 +14,7 @@ numpy
 pyyaml
 pytz
 Pillow
+smolagents[all]
+helium
+selenium
+python-dotenv
