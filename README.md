@@ -1,5 +1,5 @@
 ---
-title: First Agent Template
+title: Multi Agent RAG
 emoji: ⚡
 colorFrom: pink
 colorTo: yellow
