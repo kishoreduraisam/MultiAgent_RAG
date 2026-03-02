@@ -1,5 +1,5 @@
 ---
-title: My Career
+title: Multi Agent RAG
 emoji: ":zap:"
 colorFrom: pink
 colorTo: yellow
@@ -15,39 +15,43 @@ tags:
 - agent-course
 ---
 
-# My Career
+# Multi Agent RAG
 
-A Gradio app that wraps a `smolagents` CodeAgent to answer questions about a resume and generate career-related outputs (summaries, leadership highlights, role fit), plus a few utility tools (currency conversion, time zones, webpage-to-markdown, and image generation).
+A Gradio app that demonstrates a **multi-agent** setup using `smolagents`: a manager agent delegates web research to a web agent and can return either text answers or map visualizations (Plotly). It also includes a sample geospatial utility tool for cargo-flight travel time calculations.
 
 **What This Project Does**
-- Launches a chat UI for interacting with an LLM-backed agent.
-- Preloads a resume into memory and provides predefined prompt buttons for common career tasks.
-- Exposes tools for resume Q&A, webpage-to-markdown extraction, currency conversion, timezone lookup, text-to-image, and a superhero-themed party idea generator.
+- Runs a **manager agent** with a delegated **web agent** for search + webpage browsing.
+- Supports answering prompts in chat and optionally returning a Plotly map in the UI.
+- Provides a sample tool (`calculate_cargo_travel_time`) that computes great-circle flight time between coordinates.
 
 **How It Works**
-- `app.py` builds a `CodeAgent` using `HfApiModel` (Qwen2.5-Coder-32B-Instruct) and a set of custom tools.
-- The agent is wrapped in a small Gradio UI (`ResumeChatUI`) that supports chat and one-click predefined prompts.
-- A resume text blob is embedded directly in `app.py` and is auto-loaded at startup.
+- `web_agent` uses `GoogleSearchTool("serper")` and `VisitWebpageTool()` to browse the web and gather info.
+- `manager_agent` can call `web_agent`, run geospatial/plotting code, and return a Plotly figure.
+- The Gradio UI renders chat responses and shows a map if the agent returns a `plotly.graph_objects.Figure`.
 
 **Project Structure**
-- `app.py` Main entry point. Defines tools, loads prompts, builds the agent, and launches the Gradio UI.
-- `Gradio_UI.py` Generic streaming Gradio UI helper for `smolagents` (not used by `app.py`, but available).
-- `prompts.yaml` Prompt templates used by the agent.
+- `app.py` Main entry point. Defines agents, tools, and the Gradio UI, then launches the app.
+- `Gradio_UI.py` Generic streaming UI for `smolagents` (not used by `app.py`, but available).
+- `prompts.yaml` Prompt templates used by the agent(s).
 - `agent.json` Serialized agent configuration (tools + model + prompt templates).
 - `tools/` Custom tool implementations (final answer, web search, visit webpage, superhero theme).
-- `requirements.txt` Base Python dependencies (see notes below for additional runtime packages).
+- `requirements.txt` Python dependencies for web search, plotting, geo tooling, and Gradio.
 
 **Setup**
 1. Create and activate a virtual environment (optional but recommended).
 2. Install dependencies:
    - `pip install -r requirements.txt`
-   - `pip install gradio beautifulsoup4 pytz pillow`
-3. If the model is gated or rate-limited, set a Hugging Face token in your environment (for example `HF_TOKEN`).
+3. If the model is gated or rate-limited, set a Hugging Face token (e.g., `HF_TOKEN`).
 
 **Run**
 - `python app.py`
 
+**Example Prompts**
+- `Find the top 5 busiest container ports in the world and plot them on a world map.`
+- `Compare average cargo flight time from Chicago to Sydney vs. Chicago to Tokyo.`
+- `Find recent news about [topic] and summarize it in 5 bullets.`
+
 **Notes**
-- The resume content is currently hardcoded in `app.py`. Replace the `resume_text` string with your own data.
-- The `upload_resume` tool currently returns the hardcoded resume text rather than reading a file.
-- `tools/visit_webpage.py` and `tools/web_search.py` exist for agent configs like `agent.json`, but they are not wired into `app.py`.
+- `app.py` currently prints a sample `calculate_cargo_travel_time` result at startup.
+- The `check_reasoning_and_plot` hook is defined but commented out.
+- `tools/web_search.py` exists but the app uses `GoogleSearchTool("serper")` directly instead.
