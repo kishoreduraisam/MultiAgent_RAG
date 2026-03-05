@@ -1,8 +1,7 @@
-from typing import Any, Optional
+import re
+
 from smolagents.tools import Tool
-import requests
-import markdownify
-import smolagents
+
 
 class VisitWebpageTool(Tool):
     name = "visit_webpage"
@@ -42,4 +41,4 @@ class VisitWebpageTool(Tool):
             return f"An unexpected error occurred: {str(e)}"
 
     def __init__(self, *args, **kwargs):
-        self.is_initialized = False
+        super().__init__(*args, **kwargs)
